@@ -1,5 +1,4 @@
 import { GetConfigField } from "wailsjs/go/main/App";
-import { ThemeProvider } from "./contexts/theme-provider";
 import ModeToggle from "@/components/ModeToggle";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import TitleBar from "./components/TitleBar";
@@ -67,7 +66,7 @@ function App() {
           </Tabs>
         </div>
         <Toaster />
-      </SettingsProvider>{" "}
+      </SettingsProvider>
     </StorageProvider>
   );
 }
