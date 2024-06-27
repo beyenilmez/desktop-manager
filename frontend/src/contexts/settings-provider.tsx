@@ -192,7 +192,7 @@ export function SettingsProvider({
     document.documentElement.style.setProperty(
       "--opacity",
       String(
-        (windowEffect === 1 || getValue("initialWindowEffect") === "1"
+        (windowEffect === 1 || getValue("initialWindowEffect") === 1
           ? 100
           : opacity) / 100
       )

@@ -94,7 +94,7 @@ export function AppSettings() {
       <SettingsItem
         loading={loading}
         vertical={false}
-        disabled={windowEffect === 1 || getValue("initialWindowEffect") === "1"}
+        disabled={windowEffect === 1 || getValue("initialWindowEffect") === 1}
       >
         <div>
           <SettingLabel>
