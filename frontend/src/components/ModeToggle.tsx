@@ -1,10 +1,10 @@
 import { Log } from "wailsjs/go/main/App";
 import { Moon, Sun } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useTheme } from "@/contexts/theme-provider";
+import { useSettings } from "@/contexts/settings-provider";
 
 export default function ModeToggle() {
-  const { theme, setTheme } = useTheme();
+  const { theme, setTheme } = useSettings();
 
   return (
     <Button

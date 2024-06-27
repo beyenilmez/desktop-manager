@@ -1,4 +1,3 @@
-import { GetConfigField, SetConfigField } from "wailsjs/go/main/App";
 import {
   SettingsGroup,
   SettingsItem,
@@ -7,74 +6,35 @@ import {
   SettingLabel,
 } from "../ui/settings-group";
 import { Switch } from "@/components/ui/switch";
-import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Slider } from "../ui/my-slider";
 import { ToggleGroup, ToggleGroupItem } from "../ui/toggle-group";
-import { useStorage } from "@/contexts/storage-provider";
 import { ThemeSetting } from "../SettingItems/ThemeSetting";
+import { useSettings } from "@/contexts/settings-provider";
+import { useStorage } from "@/contexts/storage-provider";
 
 export function AppSettings() {
   const { t } = useTranslation();
-  const { getValue, setValue } = useStorage();
 
-  const [isLoading, setIsLoading] = useState(true);
+  const { getValue } = useStorage();
 
-  const [useSystemTitleBar, setUseSystemTitleBar] = useState(false);
-  const [useScale, setUseScale] = useState(-1);
-  const [useOpacity, setUseOpacity] = useState(-1);
-  const [useWindowEffect, setUseWindowEffect] = useState("");
-
-  useEffect(() => {
-    Promise.all([
-      GetConfigField("UseSystemTitleBar"),
-      GetConfigField("WindowScale"),
-      GetConfigField("Opacity"),
-      GetConfigField("WindowEffect"),
-    ])
-      .then(
-        ([
-          useSystemTitleBarValue,
-          windowScaleValue,
-          windowOpacityValue,
-          windowEffectValue,
-        ]) => {
-          setUseSystemTitleBar(useSystemTitleBarValue === "true");
-          setUseScale(parseInt(windowScaleValue));
-          setUseOpacity(parseInt(windowOpacityValue));
-          setUseWindowEffect(windowEffectValue);
-          if (getValue("initialWindowEffect") === undefined) {
-            setValue("initialWindowEffect", windowEffectValue);
-          }
-          setIsLoading(false); // Mark loading as complete
-        }
-      )
-      .catch((error) => {
-        console.error("Error fetching configuration:", error);
-        setIsLoading(false); // Handle loading error
-      });
-  }, []);
-
-  useEffect(() => {
-    if (!isLoading) {
-      document.documentElement.style.setProperty(
-        "--opacity",
-        String(
-          Number(
-            useWindowEffect === "1" || getValue("initialWindowEffect") === "1"
-              ? "100"
-              : useOpacity
-          ) / 100
-        )
-      );
-    }
-  }, [useWindowEffect]);
+  const {
+    loading,
+    windowEffect,
+    setWindowEffect,
+    opacity,
+    setOpacity,
+    windowScale,
+    setWindowScale,
+    useSystemTitleBar,
+    setUseSystemTitleBar,
+  } = useSettings();
 
   return (
     <SettingsGroup className="flex flex-col items-start px-4 py-2 w-full h-full">
       <ThemeSetting />
 
-      <SettingsItem loading={isLoading}>
+      <SettingsItem loading={loading}>
         <div>
           <SettingLabel>
             {t("settings.application.window_effect.label")}
@@ -87,15 +47,11 @@ export function AppSettings() {
           </SettingDescription>
         </div>
         <SettingContent>
-          <ToggleGroup type="single" value={useWindowEffect}>
+          <ToggleGroup type="single" value={String(windowEffect)}>
             <ToggleGroupItem
               value="1"
               aria-label="No window effect"
-              onClick={() => {
-                SetConfigField("WindowEffect", "1").then(() => {
-                  setUseWindowEffect("1");
-                });
-              }}
+              onClick={() => setWindowEffect(1)}
             >
               {t("settings.application.window_effect.none")}
             </ToggleGroupItem>
@@ -103,11 +59,7 @@ export function AppSettings() {
             <ToggleGroupItem
               value="0"
               aria-label="Auto window effect"
-              onClick={() => {
-                SetConfigField("WindowEffect", "0").then(() => {
-                  setUseWindowEffect("0");
-                });
-              }}
+              onClick={() => setWindowEffect(0)}
             >
               {t("settings.application.window_effect.auto")}
             </ToggleGroupItem>
@@ -115,11 +67,7 @@ export function AppSettings() {
             <ToggleGroupItem
               value="2"
               aria-label="Mica window effect"
-              onClick={() => {
-                SetConfigField("WindowEffect", "2").then(() => {
-                  setUseWindowEffect("2");
-                });
-              }}
+              onClick={() => setWindowEffect(2)}
             >
               {t("settings.application.window_effect.mica")}
             </ToggleGroupItem>
@@ -127,11 +75,7 @@ export function AppSettings() {
             <ToggleGroupItem
               value="3"
               aria-label="Acrylic window effect"
-              onClick={() => {
-                SetConfigField("WindowEffect", "3").then(() => {
-                  setUseWindowEffect("3");
-                });
-              }}
+              onClick={() => setWindowEffect(3)}
             >
               {t("settings.application.window_effect.acrylic")}
             </ToggleGroupItem>
@@ -139,11 +83,7 @@ export function AppSettings() {
             <ToggleGroupItem
               value="4"
               aria-label="Tabbed window effect"
-              onClick={() => {
-                SetConfigField("WindowEffect", "4").then(() => {
-                  setUseWindowEffect("4");
-                });
-              }}
+              onClick={() => setWindowEffect(4)}
             >
               {t("settings.application.window_effect.tabbed")}
             </ToggleGroupItem>
@@ -152,11 +92,9 @@ export function AppSettings() {
       </SettingsItem>
 
       <SettingsItem
-        loading={isLoading}
+        loading={loading}
         vertical={false}
-        disabled={
-          useWindowEffect === "1" || getValue("initialWindowEffect") === "1"
-        }
+        disabled={windowEffect === 1 || getValue("initialWindowEffect") === "1"}
       >
         <div>
           <SettingLabel>
@@ -170,34 +108,20 @@ export function AppSettings() {
           <div className="flex gap-2">
             <div>50%</div>
             <Slider
-              onValueChange={(value) => {
-                setUseOpacity(value[0]);
-                document.documentElement.style.setProperty(
-                  "--opacity",
-                  String(
-                    (useWindowEffect === "1" ||
-                    getValue("initialWindowEffect") === "1"
-                      ? 100
-                      : useOpacity) / 100
-                  )
-                );
-              }}
-              onPointerUp={() => {
-                SetConfigField("Opacity", String(useOpacity));
-              }}
-              defaultValue={[useOpacity]}
+              onValueChange={(value) => setOpacity(value[0])}
+              defaultValue={[opacity]}
               min={50}
               max={100}
               step={1}
               className={"w-64 cursor-pointer"}
             />
             <div>100%</div>
-            <div className="w-16 font-bold text-center">({useOpacity}%)</div>
+            <div className="w-16 font-bold text-center">({opacity}%)</div>
           </div>
         </SettingContent>
       </SettingsItem>
 
-      <SettingsItem loading={isLoading} vertical={false}>
+      <SettingsItem loading={loading} vertical={false}>
         <div>
           <SettingLabel>
             {t("settings.application.window_scale.label")}
@@ -211,27 +135,25 @@ export function AppSettings() {
             <div>50%</div>
             <Slider
               onValueChange={(value) => {
-                setUseScale(value[0]);
+                setWindowScale(value[0]);
               }}
               onPointerUp={() => {
                 document.documentElement.style.fontSize =
-                  useScale * (16 / 100) + "px";
-
-                SetConfigField("WindowScale", String(useScale));
+                  windowScale * (16 / 100) + "px";
               }}
-              defaultValue={[useScale]}
+              defaultValue={[windowScale]}
               min={50}
               max={150}
               step={10}
               className={"w-64 cursor-pointer"}
             />
             <div>150%</div>
-            <div className="w-16 font-bold text-center">({useScale}%)</div>
+            <div className="w-16 font-bold text-center">({windowScale}%)</div>
           </div>
         </SettingContent>
       </SettingsItem>
 
-      <SettingsItem loading={isLoading}>
+      <SettingsItem loading={loading}>
         <div>
           <SettingLabel>
             {t("settings.application.use_system_title_bar.label")}
@@ -246,11 +168,7 @@ export function AppSettings() {
         <SettingContent>
           <Switch
             checked={useSystemTitleBar}
-            onCheckedChange={(value) => {
-              SetConfigField("UseSystemTitleBar", String(value)).then(() => {
-                setUseSystemTitleBar(value);
-              });
-            }}
+            onCheckedChange={(value) => setUseSystemTitleBar(value)}
           />
         </SettingContent>
       </SettingsItem>

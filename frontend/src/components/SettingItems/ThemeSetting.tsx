@@ -7,11 +7,11 @@ import {
 import { useTranslation } from "react-i18next";
 import { ToggleGroup, ToggleGroupItem } from "../ui/toggle-group";
 import { Monitor, Moon, Sun } from "lucide-react";
-import { useTheme } from "@/contexts/theme-provider";
+import { useSettings } from "@/contexts/settings-provider";
 
 export function ThemeSetting() {
     const { t } = useTranslation();
-    const { theme, setTheme } = useTheme();
+    const { theme, setTheme } = useSettings();
 
     return (
         <SettingsItem>

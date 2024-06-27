@@ -1,9 +1,4 @@
 import {
-  GetConfigField,
-  Log,
-  SetConfigField,
-} from "wailsjs/go/main/App";
-import {
   SettingsGroup,
   SettingsItem,
   SettingContent,
@@ -12,67 +7,39 @@ import {
 } from "../ui/settings-group";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Switch } from "../ui/switch";
-import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Input } from "../ui/input";
+import { useSettings } from "@/contexts/settings-provider";
+import { useState } from "react";
 
 export function AdvancedSettings() {
   const { t } = useTranslation();
 
-  const [isLoading, setIsLoading] = useState(true);
+  const {
+    loading,
+    enableLogging,
+    setEnableLogging,
+    enableTrace,
+    setEnableTrace,
+    enableDebug,
+    setEnableDebug,
+    enableInfo,
+    setEnableInfo,
+    enableWarn,
+    setEnableWarn,
+    enableError,
+    setEnableError,
+    enableFatal,
+    setEnableFatal,
+    maxLogFiles,
+    setMaxLogFiles,
+  } = useSettings();
 
-  const [enableLogging, setEnableLogging] = useState(false);
-  const [enableTrace, setEnableTrace] = useState(false);
-  const [enableDebug, setEnableDebug] = useState(false);
-  const [enableInfo, setEnableInfo] = useState(false);
-  const [enableWarn, setEnableWarn] = useState(false);
-  const [enableError, setEnableError] = useState(false);
-  const [enableFatal, setEnableFatal] = useState(false);
-  const [maxLogFiles, setMaxLogFiles] = useState(-1);
-
-  useEffect(() => {
-    Promise.all([
-      GetConfigField("EnableLogging"),
-      GetConfigField("EnableTrace"),
-      GetConfigField("EnableDebug"),
-      GetConfigField("EnableInfo"),
-      GetConfigField("EnableWarn"),
-      GetConfigField("EnableError"),
-      GetConfigField("EnableFatal"),
-      GetConfigField("MaxLogFiles"),
-    ])
-      .then(
-        ([
-          enableLogging,
-          enableTrace,
-          enableDebug,
-          enableInfo,
-          enableWarn,
-          enableError,
-          enableFatal,
-          maxLogFiles,
-        ]) => {
-          setEnableLogging(enableLogging === "true");
-          setEnableTrace(enableTrace === "true");
-          setEnableDebug(enableDebug === "true");
-          setEnableInfo(enableInfo === "true");
-          setEnableWarn(enableWarn === "true");
-          setEnableError(enableError === "true");
-          setEnableFatal(enableFatal === "true");
-          setMaxLogFiles(parseInt(maxLogFiles));
-
-          setIsLoading(false);
-        }
-      )
-      .catch((error) => {
-        Log("Error while loading advanced settings: " + error, 4);
-        setIsLoading(false);
-      });
-  }, []);
+  const [maxLogFilesState, setMaxLogFilesState] = useState(String(maxLogFiles));
 
   return (
     <SettingsGroup className="flex flex-col items-start px-4 py-2 w-full h-full">
-      <SettingsItem loading={isLoading}>
+      <SettingsItem loading={loading}>
         <div>
           <SettingLabel>{t("settings.advanced.logging.label")}</SettingLabel>
           <SettingDescription>
@@ -85,18 +52,12 @@ export function AdvancedSettings() {
         <SettingContent>
           <Switch
             checked={enableLogging}
-            onCheckedChange={() => {
-              SetConfigField("EnableLogging", String(!enableLogging)).then(
-                () => {
-                  setEnableLogging(!enableLogging);
-                }
-              );
-            }}
+            onCheckedChange={() => setEnableLogging(!enableLogging)}
           />
         </SettingContent>
       </SettingsItem>
 
-      <SettingsItem loading={isLoading}>
+      <SettingsItem loading={loading}>
         <div>
           <SettingLabel>{t("settings.advanced.log_levels.label")}</SettingLabel>
           <SettingDescription>
@@ -118,11 +79,7 @@ export function AdvancedSettings() {
             <ToggleGroupItem
               value="trace"
               aria-label="Enable trace logging"
-              onClick={() => {
-                SetConfigField("EnableTrace", String(!enableTrace)).then(() => {
-                  setEnableTrace(!enableTrace);
-                });
-              }}
+              onClick={() => setEnableTrace(!enableTrace)}
             >
               Trace
             </ToggleGroupItem>
@@ -130,11 +87,7 @@ export function AdvancedSettings() {
             <ToggleGroupItem
               value="debug"
               aria-label="Enable debug logging"
-              onClick={() => {
-                SetConfigField("EnableDebug", String(!enableDebug)).then(() => {
-                  setEnableDebug(!enableDebug);
-                });
-              }}
+              onClick={() => setEnableDebug(!enableDebug)}
             >
               Debug
             </ToggleGroupItem>
@@ -142,11 +95,7 @@ export function AdvancedSettings() {
             <ToggleGroupItem
               value="info"
               aria-label="Enable info logging"
-              onClick={() => {
-                SetConfigField("EnableInfo", String(!enableInfo)).then(() => {
-                  setEnableInfo(!enableInfo);
-                });
-              }}
+              onClick={() => setEnableInfo(!enableInfo)}
             >
               Info
             </ToggleGroupItem>
@@ -154,11 +103,7 @@ export function AdvancedSettings() {
             <ToggleGroupItem
               value="warn"
               aria-label="Enable warn logging"
-              onClick={() => {
-                SetConfigField("EnableWarn", String(!enableWarn)).then(() => {
-                  setEnableWarn(!enableWarn);
-                });
-              }}
+              onClick={() => setEnableWarn(!enableWarn)}
             >
               Warn
             </ToggleGroupItem>
@@ -166,11 +111,7 @@ export function AdvancedSettings() {
             <ToggleGroupItem
               value="error"
               aria-label="Enable error logging"
-              onClick={() => {
-                SetConfigField("EnableError", String(!enableError)).then(() => {
-                  setEnableError(!enableError);
-                });
-              }}
+              onClick={() => setEnableError(!enableError)}
             >
               Error
             </ToggleGroupItem>
@@ -178,11 +119,7 @@ export function AdvancedSettings() {
             <ToggleGroupItem
               value="fatal"
               aria-label="Enable fatal logging"
-              onClick={() => {
-                SetConfigField("EnableFatal", String(!enableFatal)).then(() => {
-                  setEnableFatal(!enableFatal);
-                });
-              }}
+              onClick={() => setEnableFatal(!enableFatal)}
             >
               Fatal
             </ToggleGroupItem>
@@ -190,7 +127,7 @@ export function AdvancedSettings() {
         </SettingContent>
       </SettingsItem>
 
-      <SettingsItem loading={isLoading}>
+      <SettingsItem loading={loading}>
         <div>
           <SettingLabel>
             {t("settings.advanced.max_log_files.label")}
@@ -206,16 +143,22 @@ export function AdvancedSettings() {
           <Input
             type="number"
             placeholder="20"
-            value={maxLogFiles}
+            value={maxLogFilesState}
             onChange={(e) => {
+
+              if (isNaN(parseInt(e.target.value))) {
+                setMaxLogFiles(20);
+                setMaxLogFilesState("");
+                return;
+              }
+
               const value = Math.max(
                 1,
                 Math.min(10000, parseInt(e.target.value))
               );
-              const targetValue = isNaN(parseInt(e.target.value)) ? 20 : value;
-              SetConfigField("MaxLogFiles", String(targetValue)).then(() => {
-                setMaxLogFiles(value);
-              });
+
+              setMaxLogFiles(value);
+              setMaxLogFilesState(String(value));
             }}
             min={1}
             max={10000}

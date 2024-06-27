@@ -9,6 +9,7 @@ import { useEffect } from "react";
 import { StorageProvider } from "./contexts/storage-provider";
 import { Toaster } from "./components/ui/toaster";
 import { useToast } from "./components/ui/use-toast";
+import { SettingsProvider } from "./contexts/settings-provider";
 
 function App() {
   const { t } = useTranslation();
@@ -40,8 +41,8 @@ function App() {
   };
 
   return (
-    <ThemeProvider defaultTheme="system">
-      <StorageProvider>
+    <StorageProvider>
+      <SettingsProvider>
         <div className="flex flex-col h-dvh">
           <TitleBar />
           <Tabs defaultValue="packs" className="flex flex-col w-full h-full">
@@ -66,8 +67,8 @@ function App() {
           </Tabs>
         </div>
         <Toaster />
-      </StorageProvider>
-    </ThemeProvider>
+      </SettingsProvider>{" "}
+    </StorageProvider>
   );
 }
 
